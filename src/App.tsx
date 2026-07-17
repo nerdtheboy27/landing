@@ -1,20 +1,15 @@
 import { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { SplitText } from 'gsap/SplitText';
 
-// SplitText is loaded via CDN in index.html
-declare const SplitText: any;
-if (typeof SplitText !== 'undefined') {
-  gsap.registerPlugin(SplitText);
-}
-
+gsap.registerPlugin(SplitText);
 function App() {
   const container = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     // Make sure SplitText and fonts are ready
     document.fonts.ready.then(() => {
-      if (typeof SplitText === 'undefined') return;
 
       const heading = new SplitText(".hero-header h1", {
         type: "lines, words, chars",
