@@ -4,15 +4,16 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         base: {
-          100: '#f5e1bf',
-          200: '#c49241',
-          300: '#f75828',
-          400: '#e01b22',
-          500: '#17100a',
+          100: 'var(--base-100)',
+          200: 'var(--base-200)',
+          300: 'var(--base-300)',
+          400: 'var(--base-400)',
+          500: 'var(--base-500)',
         },
       },
       fontFamily: {

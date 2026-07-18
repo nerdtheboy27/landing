@@ -3,9 +3,25 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --base-100: #eff6ff; /* blue-50 */
+    --base-200: #bfdbfe; /* blue-200 */
+    --base-300: #3b82f6; /* blue-500 (Primary) */
+    --base-400: #1d4ed8; /* blue-700 */
+    --base-500: #172554; /* blue-950 */
+  }
+
+  .dark {
+    --base-100: #172554; /* blue-950 */
+    --base-200: #1e3a8a; /* blue-900 */
+    --base-300: #3b82f6; /* blue-500 (Primary) */
+    --base-400: #60a5fa; /* blue-400 */
+    --base-500: #eff6ff; /* blue-50 */
+  }
+
   body {
-    background-color: theme('colors.base.100');
-    color: theme('colors.base.500');
+    background-color: var(--base-100);
+    color: var(--base-500);
     margin: 0;
     padding: 0;
     width: 100%;

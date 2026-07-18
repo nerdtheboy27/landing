@@ -1,10 +1,20 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { SplitText } from 'gsap/SplitText';
 
 gsap.registerPlugin(SplitText);
 function App() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
+
   const container = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -262,6 +272,14 @@ function App() {
           <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-100">Always Welcome</p>
         </div>
       </section>
+
+      {/* Dark Mode Toggle */}
+      <button
+        onClick={() => setIsDark(!isDark)}
+        className="fixed bottom-20 right-6 z-[100] px-4 py-2 bg-base-500 text-base-100 rounded-full font-instrument shadow-lg border border-base-400 hover:scale-105 transition-transform cursor-pointer"
+      >
+        {isDark ? 'Light Mode' : 'Dark Mode'}
+      </button>
     </div>
   );
 }
