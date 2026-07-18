@@ -3,6 +3,13 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { SplitText } from 'gsap/SplitText';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import item1Svg from './assets/item1.svg';
+import item2Svg from './assets/item2.svg';
+import item3Svg from './assets/item3.svg';
+import item4Svg from './assets/item4.svg';
+import item6Svg from './assets/item6.svg';
+import item7Svg from './assets/item7.svg';
+import heroSvg from './assets/hero2.svg';
 
 gsap.registerPlugin(SplitText, ScrollTrigger);
 
@@ -59,7 +66,9 @@ function App() {
         }
         gsap.set(heading.chars, { y: 50, opacity: 0, scale: 0.5 });
         gsap.set(footerText.lines, { yPercent: 100 });
-        gsap.set(".bottle-img", { xPercent: -50, yPercent: 50, rotation: 15, scale: 0.5, opacity: 0 });
+        gsap.set(".bottle-img", { xPercent: -53, yPercent: 50, rotation: 2, scale: 0.5, opacity: 0 });
+        gsap.set(".left-element", { yPercent: 50, scale: 0.5, opacity: 0 });
+        gsap.set(".right-element", { yPercent: 50, scale: 0.5, opacity: 0 });
 
         gsap.set(".item", { xPercent: -50, yPercent: -50, scale: 0 });
         gsap.set(".hero-img-bg", { scale: 0 });
@@ -203,12 +212,12 @@ function App() {
         tl.to(
           ".hero-img-bg",
           {
-            scale: 1,
+            scale: 1.15,
             duration: 1,
             ease: "power3.inOut",
             onComplete: () => {
               gsap.to(".hero-img-bg", {
-                scale: 1.05,
+                scale: 1.2,
                 duration: 2,
                 repeat: -1,
                 yoyo: true,
@@ -222,16 +231,16 @@ function App() {
         tl.to(
           ".bottle-img",
           {
-            yPercent: -50,
-            rotation: 8,
+            xPercent: -53,
+            yPercent: -60,
+            rotation: 2,
             opacity: 1,
-            scale: 1,
+            scale: 0.85,
             duration: 1,
             ease: "power3.out",
             onComplete: () => {
               gsap.to(".bottle-img", {
                 y: "-=20",
-                rotation: "-=3",
                 duration: 2.5,
                 yoyo: true,
                 repeat: -1,
@@ -242,13 +251,91 @@ function App() {
           "<0.2"
         );
 
+        tl.to(
+          ".left-element",
+          {
+            yPercent: -20,
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out",
+            onComplete: () => {
+              gsap.to(".left-element", {
+                y: "-=15",
+                duration: 3.2,
+                yoyo: true,
+                repeat: -1,
+                ease: "sine.inOut"
+              });
+            }
+          },
+          "<0.2"
+        );
+
+        tl.to(
+          ".right-element",
+          {
+            yPercent: -20,
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out",
+            onComplete: () => {
+              gsap.to(".right-element", {
+                y: "-=10",
+                duration: 2.7,
+                yoyo: true,
+                repeat: -1,
+                ease: "sine.inOut"
+              });
+            }
+          },
+          "<0.1"
+        );
+
         tl.to(heading.chars, { y: 0, opacity: 1, scale: 1, duration: 1, stagger: 0.02, ease: "power3.out" }, "<0.2");
         tl.to(footerText.lines, { yPercent: 0, duration: 1, stagger: 0.1, ease: "power3.out" }, "<");
 
 
+        // Magnetic effect for floating elements
+        const handleMouseMove = (e: MouseEvent) => {
+          const { clientX, clientY } = e;
+          
+          document.querySelectorAll('.magnetic').forEach((el) => {
+            const rect = el.getBoundingClientRect();
+            const elCenterX = rect.left + rect.width / 2;
+            const elCenterY = rect.top + rect.height / 2;
+            
+            const distanceX = clientX - elCenterX;
+            const distanceY = clientY - elCenterY;
+            const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+            
+            const magneticRadius = 250;
+            
+            if (distance < magneticRadius) {
+              const pullStrength = 0.15;
+              gsap.to(el, {
+                x: distanceX * pullStrength,
+                y: distanceY * pullStrength,
+                duration: 0.6,
+                ease: "power2.out"
+              });
+            } else {
+              gsap.to(el, {
+                x: 0,
+                y: 0,
+                duration: 0.8,
+                ease: "elastic.out(1, 0.3)"
+              });
+            }
+          });
+        };
+        window.addEventListener("mousemove", handleMouseMove);
+
         // Cleanup function for matchMedia context
         return () => {
           floatingTweens.forEach(t => t.kill());
+          window.removeEventListener("mousemove", handleMouseMove);
         };
       });
     });
@@ -286,14 +373,14 @@ function App() {
       }
 
       // Staggered entry for links
-      gsap.fromTo(".mobile-menu-link", 
+      gsap.fromTo(".mobile-menu-link",
         { opacity: 0, y: 30 },
-        { 
-          opacity: 1, 
-          y: 0, 
-          duration: 0.5, 
-          stagger: 0.05, 
-          delay: 0.2, 
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.05,
+          delay: 0.2,
           ease: "power3.out",
           onComplete: () => setIsMenuAnimationComplete(true)
         }
@@ -332,10 +419,10 @@ function App() {
         <div className="preloader-revealer absolute w-full h-[100svh] origin-center bg-base-100" style={{ clipPath: 'circle(0% at 50% 50%)' }}></div>
 
         <div className="items absolute top-0 left-0 w-full h-full pointer-events-none">
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[14vw] -translate-x-1/2 -translate-y-1/2"><img src="/item1.png" alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[14vw] -translate-x-1/2 -translate-y-1/2"><img src="/item2.png" alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[14vw] -translate-x-1/2 -translate-y-1/2"><img src="/item3.png" alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[14vw] -translate-x-1/2 -translate-y-1/2"><img src="/item4.png" alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[45vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item1Svg} alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[45vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item2Svg} alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[45vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item3Svg} alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[45vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item4Svg} alt="" className="w-full h-full object-cover" /></div>
         </div>
 
         <div className="preloader-logo absolute top-1/2 left-1/2 w-[25vw] md:w-[15vw] lg:w-[15vw] -translate-x-1/2 -translate-y-1/2 scale-50 opacity-0 will-change-transform">
@@ -404,7 +491,7 @@ function App() {
             <div className="w-6 md:w-8 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full rotate-45 absolute transition-colors duration-200"></div>
             <div className="w-6 md:w-8 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full -rotate-45 absolute transition-colors duration-200"></div>
           </div>
-          
+
           {/* New X mark */}
           <div className="absolute flex justify-center items-center w-full h-full -translate-x-full scale-50 transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0 group-hover:scale-100 motion-reduce:-translate-x-0 motion-reduce:scale-100 motion-reduce:opacity-0 motion-reduce:group-hover:opacity-100">
             <div className="w-6 md:w-8 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full rotate-45 absolute transition-colors duration-200"></div>
@@ -416,9 +503,9 @@ function App() {
         <div className="flex flex-col w-full h-full pt-20 md:pt-24 px-6 pb-6 overflow-hidden">
           <div className="flex-1 flex flex-col justify-center min-h-[min-content]">
             {['SHOP', 'WHOLESALE', 'ABOUT', 'CONTACT', 'FAQ'].map((text) => (
-              <a 
-                key={text} 
-                href="#" 
+              <a
+                key={text}
+                href="#"
                 className="mobile-menu-link opacity-0 border-b border-dashed border-base-400 block group relative"
               >
                 {/* Dummy Hover Image (fixed, z-0) */}
@@ -451,16 +538,16 @@ function App() {
               <div className="absolute inset-0 bg-base-100 translate-y-full transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 z-0"></div>
               <span className="relative z-10">INSTAGRAM</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 md:w-8 md:h-8 relative z-10 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:rotate-6">
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
               </svg>
             </a>
             <a href="#" className="mobile-social opacity-0 flex-1 py-4 px-6 md:py-6 md:px-8 border-2 border-base-100 rounded-xl flex items-center justify-between font-barlow font-bold text-xl md:text-3xl text-base-100 hover:text-base-500 hover:-translate-y-1 active:scale-[0.97] active:translate-y-0 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] relative overflow-hidden group">
               <div className="absolute inset-0 bg-base-100 translate-y-full transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 z-0"></div>
               <span className="relative z-10">FACEBOOK</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 md:w-8 md:h-8 relative z-10 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:rotate-6">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
               </svg>
             </a>
           </div>
@@ -471,18 +558,26 @@ function App() {
       <section className="hero relative w-full h-[100svh] bg-base-100 z-0">
         <div className="hero-header absolute top-[25%] md:top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] md:w-[90%] lg:w-[55%] min-[2000px]:w-[50%] text-center">
           <h1 className="font-barlow font-semibold text-[clamp(2.8rem,10vw,9rem)] md:text-[clamp(3rem,6vw,9rem)] lg:text-[clamp(3.5rem,5.5vw,9rem)] leading-[0.85] uppercase m-0 text-base-500">
-            <span className="text-transparent [-webkit-text-stroke:2px_theme('colors.base.500')]">The table you</span> will<br />keep coming back to<br />every week
+            <span className="text-transparent [-webkit-text-stroke:2px_theme('colors.base.500')]">THE ACADEMIC HUB</span> YOU<br />WILL RELY ON FOR<br />FLAWLESS SUBMISSIONS
           </h1>
         </div>
 
         <div className="hero-img absolute left-1/2 bottom-[-5%] md:bottom-[-5%] lg:bottom-[-15%] -translate-x-1/2 w-[55%] md:w-[45%] lg:w-[30%] min-[2000px]:w-[25%] min-w-[200px] md:min-w-[250px] aspect-square flex justify-center items-center">
           <div className="hero-img-bg absolute top-0 left-0 w-full h-full rounded-full bg-base-300 origin-center"></div>
-          <img src="/bottle.png" alt="" className="bottle-img absolute top-1/2 left-1/2 h-[140%] w-auto max-w-none origin-center" />
+
+          <div className="floating-element left-element absolute top-[15%] -left-[30%] w-[55%] md:w-[45%] max-w-none origin-center z-10 pointer-events-none">
+            <img src={item6Svg} alt="" className="magnetic w-full h-full object-cover drop-shadow-xl pointer-events-auto" />
+          </div>
+          <div className="floating-element right-element absolute bottom-[15%] -right-[20%] w-[45%] md:w-[40%] max-w-none origin-center z-10 pointer-events-none">
+            <img src={item7Svg} alt="" className="magnetic w-full h-full object-cover drop-shadow-xl pointer-events-auto" />
+          </div>
+
+          <img src={heroSvg} alt="" className="bottle-img absolute top-1/2 left-1/2 h-[140%] w-auto max-w-none origin-center drop-shadow-[0_45px_35px_rgba(0,0,0,0.25)]" />
         </div>
 
-        <div className="hero-footer absolute top-[45%] md:top-auto md:bottom-6 lg:bottom-0 left-0 w-full px-12 md:p-8 flex justify-between items-center md:items-end z-0">
-          <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-500 text-sm md:text-base min-[2000px]:text-3xl">Locally Sourced</p>
-          <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-500 text-sm md:text-base min-[2000px]:text-3xl">Always Welcome</p>
+        <div className="hero-footer absolute top-[45%] md:top-[55%] lg:top-auto lg:bottom-8 left-0 w-full px-6 md:px-12 lg:px-16 flex justify-between items-center z-20 pointer-events-none">
+          <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-500 text-sm md:text-base min-[2000px]:text-3xl">Welcome to</p>
+          <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-500 text-sm md:text-base min-[2000px]:text-3xl">The Acadflow</p>
         </div>
       </section>
 
