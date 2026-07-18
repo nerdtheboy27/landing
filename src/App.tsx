@@ -8,6 +8,7 @@ gsap.registerPlugin(SplitText);
 function App() {
   const [isDark, setIsDark] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuAnimationComplete, setIsMenuAnimationComplete] = useState(false);
 
   useEffect(() => {
     if (isDark) {
@@ -25,10 +26,11 @@ function App() {
       let mm = gsap.matchMedia(container);
 
       mm.add({
-        isDesktop: "(min-width: 768px)",
+        isDesktop: "(min-width: 1024px)",
+        isTablet: "(min-width: 768px) and (max-width: 1023px)",
         isMobile: "(max-width: 767px)"
       }, (context) => {
-        let { isMobile } = context.conditions as { isMobile: boolean };
+        let { isMobile, isTablet, isDesktop } = context.conditions as { isMobile: boolean, isTablet: boolean, isDesktop: boolean };
 
         const heading = new SplitText(".hero-header h1", {
           type: "lines, words, chars",
@@ -57,6 +59,11 @@ function App() {
           { x: "35vw", y: "-25vh", rotation: 15 },
           { x: "-35vw", y: "30vh", rotation: 12 },
           { x: "35vw", y: "25vh", rotation: -15 },
+        ] : isTablet ? [
+          { x: "-25vw", y: "-30vh", rotation: -20 },
+          { x: "25vw", y: "-25vh", rotation: 15 },
+          { x: "-25vw", y: "30vh", rotation: 12 },
+          { x: "25vw", y: "25vh", rotation: -15 },
         ] : [
           { x: "-20vw", y: "-30vh", rotation: -20 },
           { x: "25vw", y: "-20vh", rotation: 15 },
@@ -64,8 +71,8 @@ function App() {
           { x: "15vw", y: "25vh", rotation: -15 },
         ];
 
-        const EXIT_DISTANCE = isMobile ? 4.5 : 3.5;
-        const END_SCALE = isMobile ? 2.5 : 2.3;
+        const EXIT_DISTANCE = isMobile ? 4.5 : isTablet ? 4.0 : 3.5;
+        const END_SCALE = isMobile ? 2.5 : isTablet ? 2.0 : 2.3;
 
         const itemExits = itemTargets.map((target) => ({
           x: parseFloat(target.x) * EXIT_DISTANCE + "vw",
@@ -214,18 +221,38 @@ function App() {
   // Mobile menu animation
   useGSAP(() => {
     if (isMenuOpen) {
+      setIsMenuAnimationComplete(false);
       gsap.to(".mobile-menu", {
         top: 8,
         right: 8,
         width: window.innerWidth - 16,
         height: window.innerHeight - 16,
         borderRadius: 24,
-        duration: 0.5,
-        ease: "power3.inOut"
+        duration: 0.6,
+        ease: "power4.inOut",
       });
-      gsap.to(".mobile-menu-link", { opacity: 1, duration: 0.5, delay: 0.3, ease: "power3.out" });
-      gsap.to(".mobile-social", { opacity: 1, duration: 0.5, delay: 0.3, ease: "power3.out" });
+
+      // Staggered entry for links
+      gsap.fromTo(".mobile-menu-link", 
+        { opacity: 0, y: 30 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.5, 
+          stagger: 0.05, 
+          delay: 0.2, 
+          ease: "power3.out",
+          onComplete: () => setIsMenuAnimationComplete(true)
+        }
+      );
+
+      // Social icons entry
+      gsap.fromTo(".mobile-social",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, delay: 0.4, ease: "power3.out" }
+      );
     } else {
+      setIsMenuAnimationComplete(false);
       gsap.to(".mobile-menu", {
         top: 16,
         right: 16,
@@ -235,13 +262,14 @@ function App() {
         duration: 0.4,
         ease: "power3.inOut"
       });
-      gsap.set(".mobile-menu-link", { opacity: 0 });
-      gsap.set(".mobile-social", { opacity: 0 });
+      // Snappy exit for links and socials
+      gsap.to(".mobile-menu-link", { opacity: 0, y: 15, duration: 0.2, ease: "power2.in" });
+      gsap.to(".mobile-social", { opacity: 0, y: 15, duration: 0.2, ease: "power2.in" });
     }
   }, { scope: container, dependencies: [isMenuOpen] });
 
   return (
-    <div ref={container} className="relative w-full min-h-screen overflow-hidden bg-base-100 text-base-500">
+    <div ref={container} className="relative w-full min-h-screen overflow-x-hidden bg-base-100 text-base-500">
       {/* Preloader */}
       <div className="preloader fixed w-full h-[100svh] text-base-500 overflow-hidden z-[2]">
         <div className="preloader-bg absolute w-full h-[100svh] origin-center bg-base-100"></div>
@@ -251,27 +279,27 @@ function App() {
         <div className="preloader-revealer absolute w-full h-[100svh] origin-center bg-base-100" style={{ clipPath: 'circle(0% at 50% 50%)' }}></div>
 
         <div className="items absolute top-0 left-0 w-full h-full pointer-events-none">
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[15vw] -translate-x-1/2 -translate-y-1/2"><img src="/item1.png" alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[15vw] -translate-x-1/2 -translate-y-1/2"><img src="/item2.png" alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[15vw] -translate-x-1/2 -translate-y-1/2"><img src="/item3.png" alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[15vw] -translate-x-1/2 -translate-y-1/2"><img src="/item4.png" alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src="/item1.png" alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src="/item2.png" alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src="/item3.png" alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src="/item4.png" alt="" className="w-full h-full object-cover" /></div>
         </div>
 
-        <div className="preloader-logo absolute top-1/2 left-1/2 w-[25vw] md:w-[10vw] -translate-x-1/2 -translate-y-1/2 scale-50 opacity-0 will-change-transform">
+        <div className="preloader-logo absolute top-1/2 left-1/2 w-[25vw] md:w-[15vw] lg:w-[15vw] -translate-x-1/2 -translate-y-1/2 scale-50 opacity-0 will-change-transform">
           <img src="/logo.svg" alt="" className="w-full h-auto" />
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 w-full p-4 md:p-3 flex justify-between items-start z-[100]">
+      <nav className="fixed top-0 left-0 w-full p-4 lg:p-3 flex justify-between items-start z-[100]">
         <div className="nav-logo relative z-[100]">
-          <img src="/logo.svg" alt="" className="w-20 md:w-28 origin-top-left" />
+          <img src="/logo.svg" alt="" className="w-20 lg:w-28 min-[2000px]:w-48 origin-top-left" />
         </div>
 
         {/* Desktop Links */}
-        <div className="nav-items hidden md:flex gap-10 items-center">
+        <div className="nav-items hidden lg:flex gap-10 min-[2000px]:gap-24 items-center">
           {['SHOP', 'WHOLESALE', 'ABOUT', 'CONTACT', 'FAQ', 'CART(0)'].map((text) => (
-            <a key={text} href="#" className="font-barlow font-semibold text-[2.5rem] uppercase no-underline group overflow-hidden flex h-[1.2em] text-base-500">
+            <a key={text} href="#" className="font-barlow font-semibold text-[2.5rem] min-[2000px]:text-[4.5rem] uppercase no-underline group overflow-hidden flex h-[1.2em] text-base-500">
               <div className="nav-word-wrapper flex">
                 {text.split('').map((char, i) => (
                   <div
@@ -292,7 +320,7 @@ function App() {
 
       {/* Mobile Menu / Hamburger Morph */}
       <div
-        className={`mobile-menu mobile-hamburger fixed z-[110] md:hidden overflow-hidden transition-colors duration-700 border-2 will-change-transform opacity-0 ${isMenuOpen ? 'bg-base-500 border-base-500 cursor-default' : 'bg-base-100 border-base-500 cursor-pointer'}`}
+        className={`mobile-menu mobile-hamburger fixed z-[110] lg:hidden overflow-hidden transition-colors duration-700 border-2 will-change-transform opacity-0 ${isMenuOpen ? 'bg-base-500 border-base-500 cursor-default' : 'bg-base-100 border-base-500 cursor-pointer group'}`}
         style={{
           top: '16px', right: '16px',
           width: '72px', height: '48px',
@@ -301,67 +329,101 @@ function App() {
         onClick={() => !isMenuOpen && setIsMenuOpen(true)}
       >
         {/* Hamburger Lines (visible when closed) */}
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-1.5 transition-opacity duration-300 ${isMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-          <div className="w-8 h-0.5 bg-base-500 rounded-full"></div>
-          <div className="w-8 h-0.5 bg-base-500 rounded-full"></div>
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-1.5 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${isMenuOpen ? 'opacity-0 scale-50 rotate-90 pointer-events-none' : 'opacity-100 scale-100 rotate-0 group-hover:scale-110'}`}>
+          <div className={`w-8 h-0.5 bg-base-500 rounded-full transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${isMenuOpen ? 'translate-y-2 rotate-45' : ''}`}></div>
+          <div className={`h-0.5 bg-base-500 rounded-full transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] self-end ${isMenuOpen ? '-translate-y-2 -rotate-45 w-8' : 'w-8 group-hover:w-4'}`}></div>
         </div>
 
         {/* Close Button (visible when open) */}
         <button
           onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); }}
-          className={`absolute top-3 right-3 w-12 h-12 border-2 border-base-100 rounded-xl flex justify-center items-center overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-base-100 active:scale-95 group ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          className={`absolute top-3 right-3 md:top-6 md:right-6 w-12 h-12 md:w-16 md:h-16 border-2 border-base-100 rounded-xl flex justify-center items-center overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-base-100 active:scale-95 group ${isMenuOpen ? 'opacity-100 rotate-0 scale-100 delay-100' : 'opacity-0 -rotate-90 scale-50 pointer-events-none'}`}
         >
           {/* Existing X mark */}
           <div className="absolute flex justify-center items-center w-full h-full transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-full group-hover:scale-50 motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:scale-100 motion-reduce:group-hover:opacity-0">
-            <div className="w-6 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full rotate-45 absolute transition-colors duration-200"></div>
-            <div className="w-6 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full -rotate-45 absolute transition-colors duration-200"></div>
+            <div className="w-6 md:w-8 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full rotate-45 absolute transition-colors duration-200"></div>
+            <div className="w-6 md:w-8 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full -rotate-45 absolute transition-colors duration-200"></div>
           </div>
           
           {/* New X mark */}
           <div className="absolute flex justify-center items-center w-full h-full -translate-x-full scale-50 transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0 group-hover:scale-100 motion-reduce:-translate-x-0 motion-reduce:scale-100 motion-reduce:opacity-0 motion-reduce:group-hover:opacity-100">
-            <div className="w-6 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full rotate-45 absolute transition-colors duration-200"></div>
-            <div className="w-6 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full -rotate-45 absolute transition-colors duration-200"></div>
+            <div className="w-6 md:w-8 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full rotate-45 absolute transition-colors duration-200"></div>
+            <div className="w-6 md:w-8 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full -rotate-45 absolute transition-colors duration-200"></div>
           </div>
         </button>
 
         {/* Inner Content Container */}
-        <div className="flex flex-col w-full h-full pt-20 px-6 pb-6">
-          <div className="flex-1 flex flex-col justify-center">
+        <div className="flex flex-col w-full h-full pt-20 md:pt-24 px-6 pb-6 overflow-y-auto">
+          <div className="flex-1 flex flex-col justify-center min-h-[min-content]">
             {['SHOP', 'WHOLESALE', 'ABOUT', 'CONTACT', 'FAQ'].map((text) => (
-              <a key={text} href="#" className="mobile-menu-link opacity-0 group relative flex font-barlow font-bold text-[14vw] leading-none uppercase text-base-100 border-b border-dashed border-base-400 py-4 overflow-hidden">
-                <div className="relative flex z-10 transition-transform duration-300 ease-out group-hover:translate-x-4">
-                  {text}
+              <a 
+                key={text} 
+                href="#" 
+                className="mobile-menu-link opacity-0 border-b border-dashed border-base-400 block group relative"
+              >
+                {/* Dummy Hover Image (fixed, z-0) */}
+                <div className={`absolute left-0 w-16 h-16 top-1/2 -translate-y-1/2 z-0 pointer-events-none transition-opacity duration-200 ${isMenuAnimationComplete ? 'opacity-100' : 'opacity-0'}`}>
+                  <img src={`https://picsum.photos/seed/${text}/200/200`} alt={text} className="w-full h-full object-cover rounded-lg" />
                 </div>
-                <div className="absolute top-4 left-0 flex z-0 text-transparent [-webkit-text-stroke:2px_theme('colors.base.100')] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  {text}
+
+                {/* Text Container (Solid bg masking the image, shifts right to reveal) */}
+                <div className={`relative z-10 py-3 md:py-4 transition-transform duration-[550ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[4.5rem] ${isMenuAnimationComplete ? 'bg-base-500' : 'bg-transparent'}`}>
+                  <div className="font-barlow font-bold text-[min(14vw,9vh)] md:text-[min(10vw,8vh)] uppercase text-base-100 overflow-hidden flex h-[1.2em]">
+                    <div className="flex w-full">
+                      {text.split('').map((char, charIndex) => (
+                        <div
+                          key={charIndex}
+                          className="transition-transform duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-1/2 flex flex-col h-[2.4em]"
+                          style={{ transitionDelay: `${charIndex * 20}ms` }}
+                        >
+                          <span className="h-[1.2em] leading-[1.2] flex items-center">{char === ' ' ? '\u00A0' : char}</span>
+                          <span className="h-[1.2em] leading-[1.2] flex items-center text-transparent [-webkit-text-stroke:2px_theme('colors.base.100')]">{char === ' ' ? '\u00A0' : char}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </a>
             ))}
           </div>
           <div className="flex gap-4 mt-8">
-            <a href="#" className="mobile-social opacity-0 flex-1 py-4 border-2 border-base-100 rounded-xl text-center font-barlow font-bold text-xl text-base-100 active:bg-base-100 active:text-base-500 transition-colors">INSTAGRAM</a>
-            <a href="#" className="mobile-social opacity-0 flex-1 py-4 border-2 border-base-100 rounded-xl text-center font-barlow font-bold text-xl text-base-100 active:bg-base-100 active:text-base-500 transition-colors">FACEBOOK</a>
+            <a href="#" className="mobile-social opacity-0 flex-1 py-4 px-6 md:py-6 md:px-8 border-2 border-base-100 rounded-xl flex items-center justify-between font-barlow font-bold text-xl md:text-3xl text-base-100 hover:text-base-500 hover:-translate-y-1 active:scale-[0.97] active:translate-y-0 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] relative overflow-hidden group">
+              <div className="absolute inset-0 bg-base-100 translate-y-full transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 z-0"></div>
+              <span className="relative z-10">INSTAGRAM</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 md:w-8 md:h-8 relative z-10 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:rotate-6">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+              </svg>
+            </a>
+            <a href="#" className="mobile-social opacity-0 flex-1 py-4 px-6 md:py-6 md:px-8 border-2 border-base-100 rounded-xl flex items-center justify-between font-barlow font-bold text-xl md:text-3xl text-base-100 hover:text-base-500 hover:-translate-y-1 active:scale-[0.97] active:translate-y-0 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] relative overflow-hidden group">
+              <div className="absolute inset-0 bg-base-100 translate-y-full transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 z-0"></div>
+              <span className="relative z-10">FACEBOOK</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 md:w-8 md:h-8 relative z-10 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:rotate-6">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+            </a>
           </div>
         </div>
       </div>
 
       {/* Hero */}
-      <section className="hero relative w-full h-[100svh] bg-base-100 overflow-hidden z-0">
-        <div className="hero-header absolute top-[25%] md:top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] md:w-[55%] text-center">
-          <h1 className="font-barlow font-semibold text-[clamp(2.8rem,10vw,9rem)] md:text-[clamp(3rem,6vw,9rem)] leading-[0.85] uppercase m-0 text-base-500">
+      <section className="hero relative w-full h-[100svh] bg-base-100 overflow-x-hidden z-0">
+        <div className="hero-header absolute top-[25%] md:top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] md:w-[90%] lg:w-[55%] min-[2000px]:w-[50%] text-center">
+          <h1 className="font-barlow font-semibold text-[clamp(2.8rem,10vw,9rem)] md:text-[clamp(3rem,6vw,9rem)] lg:text-[clamp(3.5rem,7vw,16rem)] leading-[0.85] uppercase m-0 text-base-500">
             <span className="text-transparent [-webkit-text-stroke:2px_theme('colors.base.500')]">The table you </span>
             will keep coming back to every week
           </h1>
         </div>
 
-        <div className="hero-img absolute left-1/2 bottom-[-5%] md:bottom-[-15%] -translate-x-1/2 w-[55%] md:w-[30%] min-w-[200px] md:min-w-[250px] aspect-square flex justify-center items-center">
+        <div className="hero-img absolute left-1/2 bottom-[-5%] md:bottom-[-5%] lg:bottom-[-15%] -translate-x-1/2 w-[55%] md:w-[45%] lg:w-[30%] min-[2000px]:w-[25%] min-w-[200px] md:min-w-[250px] aspect-square flex justify-center items-center">
           <div className="hero-img-bg absolute top-0 left-0 w-full h-full rounded-full bg-base-300 origin-center"></div>
           <img src="/bottle.png" alt="" className="bottle-img absolute top-1/2 left-1/2 h-[140%] w-auto max-w-none origin-center" />
         </div>
 
-        <div className="hero-footer absolute top-[45%] md:top-auto md:bottom-0 left-0 w-full px-12 md:p-8 flex justify-between items-center md:items-end z-0">
-          <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-500 text-sm md:text-base">Locally Sourced</p>
-          <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-500 text-sm md:text-base">Always Welcome</p>
+        <div className="hero-footer absolute top-[45%] md:top-auto md:bottom-6 lg:bottom-0 left-0 w-full px-12 md:p-8 flex justify-between items-center md:items-end z-0">
+          <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-500 text-sm md:text-base min-[2000px]:text-3xl">Locally Sourced</p>
+          <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-500 text-sm md:text-base min-[2000px]:text-3xl">Always Welcome</p>
         </div>
       </section>
 
