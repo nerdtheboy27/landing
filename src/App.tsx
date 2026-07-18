@@ -10,6 +10,7 @@ import item4Svg from './assets/item4.svg';
 import item6Svg from './assets/item6.svg';
 import item7Svg from './assets/item7.svg';
 import heroSvg from './assets/hero2.svg';
+import { AcadFlowLogo } from './AcadFlowLogo';
 
 gsap.registerPlugin(SplitText, ScrollTrigger);
 
@@ -56,7 +57,7 @@ function App() {
           linesClass: "inline-block will-change-transform",
         });
 
-        gsap.set(".nav-logo img", { scale: 0 });
+        gsap.set(".nav-logo svg", { scale: 0 });
         // GSAP Initial Setup
         gsap.set(".nav-word-wrapper", { opacity: 0 });
         if (isDesktop) {
@@ -180,7 +181,7 @@ function App() {
 
         tl.set(".preloader", { display: "none" });
 
-        tl.to(".nav-logo img", { scale: 1, duration: 1, ease: "power3.out" }, "<");
+        tl.to(".nav-logo svg", { scale: 1, duration: 1, ease: "power3.out" }, "<");
         tl.to(".nav-word-wrapper", { opacity: 1, duration: 0.2, ease: "power2.out" }, "<");
         if (!isDesktop) {
           tl.to(".mobile-hamburger", { autoAlpha: 1, zIndex: 110, pointerEvents: "auto", duration: 0.2, ease: "power2.out" }, "<");
@@ -300,18 +301,18 @@ function App() {
         // Magnetic effect for floating elements
         const handleMouseMove = (e: MouseEvent) => {
           const { clientX, clientY } = e;
-          
+
           document.querySelectorAll('.magnetic').forEach((el) => {
             const rect = el.getBoundingClientRect();
             const elCenterX = rect.left + rect.width / 2;
             const elCenterY = rect.top + rect.height / 2;
-            
+
             const distanceX = clientX - elCenterX;
             const distanceY = clientY - elCenterY;
             const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-            
+
             const magneticRadius = 250;
-            
+
             if (distance < magneticRadius) {
               const pullStrength = 0.15;
               gsap.to(el, {
@@ -426,14 +427,14 @@ function App() {
         </div>
 
         <div className="preloader-logo absolute top-1/2 left-1/2 w-[25vw] md:w-[15vw] lg:w-[15vw] -translate-x-1/2 -translate-y-1/2 scale-50 opacity-0 will-change-transform">
-          <img src="/logo.svg" alt="" className="w-full h-auto" />
+          <AcadFlowLogo className="w-full h-auto" />
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 w-full p-4 lg:p-3 flex justify-between items-start z-[100]">
         <div className="nav-logo relative z-[100]">
-          <img src="/logo.svg" alt="" className="w-20 lg:w-28 min-[2000px]:w-48 origin-top-left" />
+          <AcadFlowLogo className="w-20 lg:w-28 min-[2000px]:w-48 origin-top-left" />
         </div>
 
         {/* Desktop Links */}
