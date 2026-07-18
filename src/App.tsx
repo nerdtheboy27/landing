@@ -2,13 +2,19 @@ import { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { SplitText } from 'gsap/SplitText';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(SplitText);
+gsap.registerPlugin(SplitText, ScrollTrigger);
 
 function App() {
   const [isDark, setIsDark] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuAnimationComplete, setIsMenuAnimationComplete] = useState(false);
+
+  const isMenuOpenRef = useRef(isMenuOpen);
+  useEffect(() => {
+    isMenuOpenRef.current = isMenuOpen;
+  }, [isMenuOpen]);
 
   useEffect(() => {
     if (isDark) {
@@ -46,7 +52,11 @@ function App() {
         gsap.set(".nav-logo img", { scale: 0 });
         // GSAP Initial Setup
         gsap.set(".nav-word-wrapper", { opacity: 0 });
-        gsap.set(".mobile-hamburger", { opacity: 0 });
+        if (isDesktop) {
+          gsap.set(".mobile-hamburger, .floating-nav-buttons", { autoAlpha: 0, y: -20, pointerEvents: "none" });
+        } else {
+          gsap.set(".mobile-hamburger, .floating-nav-buttons", { autoAlpha: 0, y: 0, pointerEvents: "auto" });
+        }
         gsap.set(heading.chars, { y: 50, opacity: 0, scale: 0.5 });
         gsap.set(footerText.lines, { yPercent: 100 });
         gsap.set(".bottle-img", { xPercent: -50, yPercent: 50, rotation: 15, scale: 0.5, opacity: 0 });
@@ -163,7 +173,32 @@ function App() {
 
         tl.to(".nav-logo img", { scale: 1, duration: 1, ease: "power3.out" }, "<");
         tl.to(".nav-word-wrapper", { opacity: 1, duration: 0.2, ease: "power2.out" }, "<");
-        tl.to(".mobile-hamburger", { opacity: 1, duration: 0.2, ease: "power2.out" }, "<");
+        if (!isDesktop) {
+          tl.to(".mobile-hamburger", { autoAlpha: 1, zIndex: 110, pointerEvents: "auto", duration: 0.2, ease: "power2.out" }, "<");
+          tl.to(".floating-nav-buttons", { autoAlpha: 1, zIndex: 105, pointerEvents: "auto", duration: 0.2, ease: "power2.out" }, "<");
+        } else {
+          // Activate ScrollTrigger as soon as navbar is visible
+          tl.call(() => {
+            ScrollTrigger.create({
+              trigger: ".hero",
+              start: "top top",
+              end: "+=100",
+              onLeave: () => {
+                if (!isMenuOpenRef.current) {
+                  gsap.to(".nav-items", { opacity: 0, y: -20, pointerEvents: "none", duration: 0.15, ease: "power2.in" });
+                  gsap.to(".mobile-hamburger", { autoAlpha: 1, y: 0, zIndex: 110, pointerEvents: "auto", duration: 0.15, delay: 0.1, ease: "power2.out" });
+                  gsap.to(".floating-nav-buttons", { autoAlpha: 1, y: 0, zIndex: 105, pointerEvents: "auto", duration: 0.15, delay: 0.1, ease: "power2.out" });
+                }
+              },
+              onEnterBack: () => {
+                if (!isMenuOpenRef.current) {
+                  gsap.to(".mobile-hamburger, .floating-nav-buttons", { autoAlpha: 0, y: -20, zIndex: 1, pointerEvents: "none", duration: 0.15, ease: "power2.in" });
+                  gsap.to(".nav-items", { opacity: 1, y: 0, pointerEvents: "auto", duration: 0.15, delay: 0.1, ease: "power2.out" });
+                }
+              }
+            });
+          });
+        }
 
         tl.to(
           ".hero-img-bg",
@@ -210,6 +245,7 @@ function App() {
         tl.to(heading.chars, { y: 0, opacity: 1, scale: 1, duration: 1, stagger: 0.02, ease: "power3.out" }, "<0.2");
         tl.to(footerText.lines, { yPercent: 0, duration: 1, stagger: 0.1, ease: "power3.out" }, "<");
 
+
         // Cleanup function for matchMedia context
         return () => {
           floatingTweens.forEach(t => t.kill());
@@ -220,17 +256,34 @@ function App() {
 
   // Mobile menu animation
   useGSAP(() => {
+    const isDesktopMenu = window.innerWidth >= 1024;
+
     if (isMenuOpen) {
       setIsMenuAnimationComplete(false);
-      gsap.to(".mobile-menu", {
-        top: 8,
-        right: 8,
-        width: window.innerWidth - 16,
-        height: window.innerHeight - 16,
-        borderRadius: 24,
-        duration: 0.6,
-        ease: "power4.inOut",
-      });
+
+      if (isDesktopMenu) {
+        // Desktop: side panel on the right with padding matching hamburger
+        gsap.to(".mobile-menu", {
+          top: 16,
+          right: 16,
+          width: window.innerWidth * 0.5,
+          height: window.innerHeight - 32,
+          borderRadius: 24,
+          duration: 0.5,
+          ease: "power4.inOut",
+        });
+      } else {
+        // Mobile/Tablet: fullscreen
+        gsap.to(".mobile-menu", {
+          top: 8,
+          right: 8,
+          width: window.innerWidth - 16,
+          height: window.innerHeight - 16,
+          borderRadius: 24,
+          duration: 0.6,
+          ease: "power4.inOut",
+        });
+      }
 
       // Staggered entry for links
       gsap.fromTo(".mobile-menu-link", 
@@ -279,10 +332,10 @@ function App() {
         <div className="preloader-revealer absolute w-full h-[100svh] origin-center bg-base-100" style={{ clipPath: 'circle(0% at 50% 50%)' }}></div>
 
         <div className="items absolute top-0 left-0 w-full h-full pointer-events-none">
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src="/item1.png" alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src="/item2.png" alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src="/item3.png" alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src="/item4.png" alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[14vw] -translate-x-1/2 -translate-y-1/2"><img src="/item1.png" alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[14vw] -translate-x-1/2 -translate-y-1/2"><img src="/item2.png" alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[14vw] -translate-x-1/2 -translate-y-1/2"><img src="/item3.png" alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[35vw] md:w-[20vw] lg:w-[14vw] -translate-x-1/2 -translate-y-1/2"><img src="/item4.png" alt="" className="w-full h-full object-cover" /></div>
         </div>
 
         <div className="preloader-logo absolute top-1/2 left-1/2 w-[25vw] md:w-[15vw] lg:w-[15vw] -translate-x-1/2 -translate-y-1/2 scale-50 opacity-0 will-change-transform">
@@ -318,9 +371,16 @@ function App() {
 
       </nav>
 
+      {/* Floating Buttons */}
+      <div className={`floating-nav-buttons fixed z-[1] top-[16px] right-[96px] min-[2000px]:right-[140px] flex items-center gap-2 min-[2000px]:gap-4 invisible opacity-0 pointer-events-none lg:-translate-y-5 ${isMenuOpen ? 'opacity-0 pointer-events-none' : ''}`}>
+        <a href="#" className="floating-btn get-sauce relative overflow-hidden group pointer-events-auto bg-base-500 border-2 border-base-500 text-base-100 rounded-[16px] px-4 md:px-6 min-[2000px]:px-10 h-[48px] min-[2000px]:h-[72px] flex items-center justify-center font-barlow font-bold text-lg md:text-xl min-[2000px]:text-3xl transition-colors duration-300 hover:bg-transparent hover:text-base-500">
+          <span className="relative z-10">GET SAUCE</span>
+        </a>
+      </div>
+
       {/* Mobile Menu / Hamburger Morph */}
       <div
-        className={`mobile-menu mobile-hamburger fixed z-[110] lg:hidden overflow-hidden transition-colors duration-700 border-2 will-change-transform opacity-0 ${isMenuOpen ? 'bg-base-500 border-base-500 cursor-default' : 'bg-base-100 border-base-500 cursor-pointer group'}`}
+        className={`mobile-menu mobile-hamburger fixed z-[1] overflow-hidden transition-colors duration-700 border-2 will-change-transform invisible opacity-0 pointer-events-none ${isMenuOpen ? 'bg-base-500 border-base-500 cursor-default !visible !opacity-100 !pointer-events-auto !translate-y-0' : 'bg-base-100 border-base-500 cursor-pointer group'}`}
         style={{
           top: '16px', right: '16px',
           width: '72px', height: '48px',
@@ -353,7 +413,7 @@ function App() {
         </button>
 
         {/* Inner Content Container */}
-        <div className="flex flex-col w-full h-full pt-20 md:pt-24 px-6 pb-6 overflow-y-auto">
+        <div className="flex flex-col w-full h-full pt-20 md:pt-24 px-6 pb-6 overflow-hidden">
           <div className="flex-1 flex flex-col justify-center min-h-[min-content]">
             {['SHOP', 'WHOLESALE', 'ABOUT', 'CONTACT', 'FAQ'].map((text) => (
               <a 
@@ -408,11 +468,10 @@ function App() {
       </div>
 
       {/* Hero */}
-      <section className="hero relative w-full h-[100svh] bg-base-100 overflow-x-hidden z-0">
+      <section className="hero relative w-full h-[100svh] bg-base-100 z-0">
         <div className="hero-header absolute top-[25%] md:top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] md:w-[90%] lg:w-[55%] min-[2000px]:w-[50%] text-center">
-          <h1 className="font-barlow font-semibold text-[clamp(2.8rem,10vw,9rem)] md:text-[clamp(3rem,6vw,9rem)] lg:text-[clamp(3.5rem,7vw,16rem)] leading-[0.85] uppercase m-0 text-base-500">
-            <span className="text-transparent [-webkit-text-stroke:2px_theme('colors.base.500')]">The table you </span>
-            will keep coming back to every week
+          <h1 className="font-barlow font-semibold text-[clamp(2.8rem,10vw,9rem)] md:text-[clamp(3rem,6vw,9rem)] lg:text-[clamp(3.5rem,5.5vw,9rem)] leading-[0.85] uppercase m-0 text-base-500">
+            <span className="text-transparent [-webkit-text-stroke:2px_theme('colors.base.500')]">The table you</span> will<br />keep coming back to<br />every week
           </h1>
         </div>
 
@@ -426,6 +485,9 @@ function App() {
           <p className="font-instrument font-medium uppercase m-0 [clip-path:polygon(0_0,100%_0,100%_100%,0%_100%)] text-base-500 text-sm md:text-base min-[2000px]:text-3xl">Always Welcome</p>
         </div>
       </section>
+
+      {/* Spacer to enable scrolling for ScrollTrigger */}
+      <div className="h-[30vh] bg-base-100"></div>
 
       {/* Dark Mode Toggle */}
       <button
