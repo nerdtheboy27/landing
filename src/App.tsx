@@ -91,6 +91,9 @@ function App() {
           const target = itemTargets[i];
           const image = item.querySelector("img");
 
+          // Set initial rotation so there is only a small amount of rotation during the load
+          gsap.set(item, { rotation: target.rotation - Math.sign(target.rotation) * 100 });
+
           tl.to(
             item,
             {
@@ -268,16 +271,16 @@ function App() {
         {/* Desktop Links */}
         <div className="nav-items hidden md:flex gap-10 items-center">
           {['SHOP', 'WHOLESALE', 'ABOUT', 'CONTACT', 'FAQ', 'CART(0)'].map((text) => (
-            <a key={text} href="#" className="font-barlow font-semibold text-[2.5rem] uppercase no-underline group overflow-hidden flex h-[1em] text-base-500">
+            <a key={text} href="#" className="font-barlow font-semibold text-[2.5rem] uppercase no-underline group overflow-hidden flex h-[1.2em] text-base-500">
               <div className="nav-word-wrapper flex">
                 {text.split('').map((char, i) => (
                   <div
                     key={i}
-                    className="transition-transform duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-1/2 flex flex-col h-[2em]"
+                    className="transition-transform duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-1/2 flex flex-col h-[2.4em]"
                     style={{ transitionDelay: `${i * 25}ms` }}
                   >
-                    <span className="h-[1em] leading-[1] flex items-center">{char === ' ' ? '\u00A0' : char}</span>
-                    <span className="h-[1em] leading-[1] flex items-center text-transparent [-webkit-text-stroke:1px_theme('colors.base.500')]">{char === ' ' ? '\u00A0' : char}</span>
+                    <span className="h-[1.2em] leading-[1.2] flex items-center">{char === ' ' ? '\u00A0' : char}</span>
+                    <span className="h-[1.2em] leading-[1.2] flex items-center text-transparent [-webkit-text-stroke:1px_theme('colors.base.500')]">{char === ' ' ? '\u00A0' : char}</span>
                   </div>
                 ))}
               </div>
@@ -306,10 +309,19 @@ function App() {
         {/* Close Button (visible when open) */}
         <button
           onClick={(e) => { e.stopPropagation(); setIsMenuOpen(false); }}
-          className={`absolute top-3 right-3 w-12 h-12 border-2 border-base-100 rounded-xl flex flex-col justify-center items-center transition-all duration-300 hover:bg-base-100 group ${isMenuOpen ? 'opacity-100 delay-300' : 'opacity-0 pointer-events-none'}`}
+          className={`absolute top-3 right-3 w-12 h-12 border-2 border-base-100 rounded-xl flex justify-center items-center overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-base-100 active:scale-95 group ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
-          <div className="w-6 h-0.5 bg-base-100 rounded-full rotate-45 absolute group-hover:bg-base-500 transition-colors duration-300"></div>
-          <div className="w-6 h-0.5 bg-base-100 rounded-full -rotate-45 absolute group-hover:bg-base-500 transition-colors duration-300"></div>
+          {/* Existing X mark */}
+          <div className="absolute flex justify-center items-center w-full h-full transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-full group-hover:scale-50 motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:scale-100 motion-reduce:group-hover:opacity-0">
+            <div className="w-6 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full rotate-45 absolute transition-colors duration-200"></div>
+            <div className="w-6 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full -rotate-45 absolute transition-colors duration-200"></div>
+          </div>
+          
+          {/* New X mark */}
+          <div className="absolute flex justify-center items-center w-full h-full -translate-x-full scale-50 transition-all duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0 group-hover:scale-100 motion-reduce:-translate-x-0 motion-reduce:scale-100 motion-reduce:opacity-0 motion-reduce:group-hover:opacity-100">
+            <div className="w-6 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full rotate-45 absolute transition-colors duration-200"></div>
+            <div className="w-6 h-0.5 bg-base-100 group-hover:bg-base-500 rounded-full -rotate-45 absolute transition-colors duration-200"></div>
+          </div>
         </button>
 
         {/* Inner Content Container */}
@@ -356,7 +368,7 @@ function App() {
       {/* Dark Mode Toggle */}
       <button
         onClick={() => setIsDark(!isDark)}
-        className="fixed bottom-6 right-6 z-[100] px-4 py-2 bg-base-500 text-base-100 rounded-full font-instrument shadow-lg border border-base-400 hover:scale-105 transition-transform cursor-pointer"
+        className="fixed bottom-20 right-6 z-[100] px-4 py-2 bg-base-500 text-base-100 rounded-full font-instrument shadow-lg border border-base-400 hover:scale-105 transition-transform cursor-pointer"
       >
         {isDark ? 'Light Mode' : 'Dark Mode'}
       </button>
