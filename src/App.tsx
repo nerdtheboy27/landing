@@ -46,7 +46,7 @@ function App() {
       const itemExits = itemTargets.map((target) => ({
         x: parseFloat(target.x) * EXIT_DISTANCE + "vw",
         y: parseFloat(target.y) * EXIT_DISTANCE + "vh",
-        rotation: target.rotation * 2.5,
+        rotation: target.rotation * 3.5,
       }));
 
       const items = gsap.utils.toArray(".item");
@@ -104,8 +104,8 @@ function App() {
       // --- ENDING ANIMATION ---
 
       tl.to(".preloader-logo", {
-        scale: 0,
-        opacity: 0,
+        y: "-200vh", // large negative value to ensure it goes completely off screen
+        scale: 2.3,
         duration: 1,
         ease: "power3.inOut"
       });
@@ -118,6 +118,7 @@ function App() {
             x: exit.x,
             y: exit.y,
             rotation: exit.rotation,
+            scale: 2.3,
             duration: 1,
             ease: "power3.inOut",
           },
@@ -160,12 +161,12 @@ function App() {
 
       tl.to(
         ".bottle-img",
-        { 
-          yPercent: -50, 
-          rotation: 8, 
-          opacity: 1, 
-          scale: 1, 
-          duration: 1, 
+        {
+          yPercent: -50,
+          rotation: 8,
+          opacity: 1,
+          scale: 1,
+          duration: 1,
           ease: "power3.out",
           onComplete: () => {
             gsap.to(".bottle-img", {
