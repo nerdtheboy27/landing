@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { SplitText } from 'gsap/SplitText';
@@ -11,6 +12,9 @@ import item6Svg from './assets/item6.svg';
 import item7Svg from './assets/item7.svg';
 import heroSvg from './assets/hero2.svg';
 import { AcadFlowLogo } from './AcadFlowLogo';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import grinningLottie from './assets/lotties/grinning.lottie';
+import { Sun, Moon } from 'lucide-react';
 
 gsap.registerPlugin(SplitText, ScrollTrigger);
 
@@ -18,6 +22,44 @@ function App() {
   const [isDark, setIsDark] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuAnimationComplete, setIsMenuAnimationComplete] = useState(false);
+
+  const toggleTheme = (e: React.MouseEvent) => {
+    if (!document.startViewTransition) {
+      setIsDark(!isDark);
+      return;
+    }
+
+    const x = e.clientX;
+    const y = e.clientY;
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    const transition = document.startViewTransition(() => {
+      flushSync(() => {
+        setIsDark(!isDark);
+      });
+    });
+
+    transition.ready.then(() => {
+      const clipPath = [
+        `circle(0px at ${x}px ${y}px)`,
+        `circle(${endRadius}px at ${x}px ${y}px)`
+      ];
+
+      document.documentElement.animate(
+        {
+          clipPath: clipPath,
+        },
+        {
+          duration: 700,
+          easing: "ease-in-out",
+          pseudoElement: "::view-transition-new(root)",
+        }
+      );
+    });
+  };
 
   const isMenuOpenRef = useRef(isMenuOpen);
   useEffect(() => {
@@ -57,7 +99,7 @@ function App() {
           linesClass: "inline-block will-change-transform",
         });
 
-        gsap.set(".nav-logo svg", { scale: 0 });
+        gsap.set(".nav-logo", { scale: 0, transformOrigin: "top left" });
         // GSAP Initial Setup
         gsap.set(".nav-word-wrapper", { opacity: 0 });
         if (isDesktop) {
@@ -73,12 +115,13 @@ function App() {
 
         gsap.set(".item", { xPercent: -50, yPercent: -50, scale: 0 });
         gsap.set(".hero-img-bg", { scale: 0 });
+        gsap.set(".lottie-sticker", { autoAlpha: 0 });
 
         const itemTargets = isMobile ? [
-          { x: "-35vw", y: "-35vh", rotation: -20 },
-          { x: "35vw", y: "-25vh", rotation: 15 },
-          { x: "-35vw", y: "30vh", rotation: 12 },
-          { x: "35vw", y: "25vh", rotation: -15 },
+          { x: "-20vw", y: "-35vh", rotation: -20 },
+          { x: "20vw", y: "-25vh", rotation: 15 },
+          { x: "-20vw", y: "30vh", rotation: 12 },
+          { x: "20vw", y: "25vh", rotation: -15 },
         ] : isTablet ? [
           { x: "-25vw", y: "-30vh", rotation: -20 },
           { x: "25vw", y: "-25vh", rotation: 15 },
@@ -181,34 +224,41 @@ function App() {
 
         tl.set(".preloader", { display: "none" });
 
-        tl.to(".nav-logo svg", { scale: 1, duration: 1, ease: "power3.out" }, "<");
+        tl.to(".nav-logo", { scale: 1, duration: 1, ease: "power3.out" }, "<");
         tl.to(".nav-word-wrapper", { opacity: 1, duration: 0.2, ease: "power2.out" }, "<");
+
         if (!isDesktop) {
           tl.to(".mobile-hamburger", { autoAlpha: 1, zIndex: 110, pointerEvents: "auto", duration: 0.2, ease: "power2.out" }, "<");
           tl.to(".floating-nav-buttons", { autoAlpha: 1, zIndex: 105, pointerEvents: "auto", duration: 0.2, ease: "power2.out" }, "<");
-        } else {
-          // Activate ScrollTrigger as soon as navbar is visible
-          tl.call(() => {
-            ScrollTrigger.create({
-              trigger: ".hero",
-              start: "top top",
-              end: "+=100",
-              onLeave: () => {
-                if (!isMenuOpenRef.current) {
+        }
+
+        // Activate ScrollTrigger as soon as navbar is visible
+        tl.call(() => {
+          ScrollTrigger.create({
+            trigger: ".hero",
+            start: "top top",
+            end: "+=100",
+            onLeave: () => {
+              if (!isMenuOpenRef.current) {
+                gsap.to(".nav-logo", { opacity: 0, y: -20, pointerEvents: "none", duration: 0.15, ease: "power2.in" });
+                if (isDesktop) {
                   gsap.to(".nav-items", { opacity: 0, y: -20, pointerEvents: "none", duration: 0.15, ease: "power2.in" });
                   gsap.to(".mobile-hamburger", { autoAlpha: 1, y: 0, zIndex: 110, pointerEvents: "auto", duration: 0.15, delay: 0.1, ease: "power2.out" });
                   gsap.to(".floating-nav-buttons", { autoAlpha: 1, y: 0, zIndex: 105, pointerEvents: "auto", duration: 0.15, delay: 0.1, ease: "power2.out" });
                 }
-              },
-              onEnterBack: () => {
-                if (!isMenuOpenRef.current) {
+              }
+            },
+            onEnterBack: () => {
+              if (!isMenuOpenRef.current) {
+                gsap.to(".nav-logo", { opacity: 1, y: 0, pointerEvents: "auto", duration: 0.15, delay: 0.1, ease: "power2.out" });
+                if (isDesktop) {
                   gsap.to(".mobile-hamburger, .floating-nav-buttons", { autoAlpha: 0, y: -20, zIndex: 1, pointerEvents: "none", duration: 0.15, ease: "power2.in" });
                   gsap.to(".nav-items", { opacity: 1, y: 0, pointerEvents: "auto", duration: 0.15, delay: 0.1, ease: "power2.out" });
                 }
               }
-            });
+            }
           });
-        }
+        });
 
         tl.to(
           ".hero-img-bg",
@@ -296,6 +346,7 @@ function App() {
 
         tl.to(heading.chars, { y: 0, opacity: 1, scale: 1, duration: 1, stagger: 0.02, ease: "power3.out" }, "<0.2");
         tl.to(footerText.lines, { yPercent: 0, duration: 1, stagger: 0.1, ease: "power3.out" }, "<");
+        tl.fromTo(".lottie-sticker", { scale: 0 }, { autoAlpha: 1, scale: 1, duration: 0.8, ease: "back.out(1.5)", immediateRender: false }, ">-0.3");
 
 
         // Magnetic effect for floating elements
@@ -420,10 +471,10 @@ function App() {
         <div className="preloader-revealer absolute w-full h-[100svh] origin-center bg-base-100" style={{ clipPath: 'circle(0% at 50% 50%)' }}></div>
 
         <div className="items absolute top-0 left-0 w-full h-full pointer-events-none">
-          <div className="item absolute top-1/2 left-1/2 w-[45vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item1Svg} alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[45vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item2Svg} alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[45vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item3Svg} alt="" className="w-full h-full object-cover" /></div>
-          <div className="item absolute top-1/2 left-1/2 w-[45vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item4Svg} alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[30vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item1Svg} alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[30vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item2Svg} alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[30vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item3Svg} alt="" className="w-full h-full object-cover" /></div>
+          <div className="item absolute top-1/2 left-1/2 w-[30vw] md:w-[28vw] lg:w-[20vw] -translate-x-1/2 -translate-y-1/2"><img src={item4Svg} alt="" className="w-full h-full object-cover" /></div>
         </div>
 
         <div className="preloader-logo absolute top-1/2 left-1/2 w-[25vw] md:w-[15vw] lg:w-[15vw] -translate-x-1/2 -translate-y-1/2 scale-50 opacity-0 will-change-transform">
@@ -433,13 +484,21 @@ function App() {
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 w-full p-4 lg:p-3 flex justify-between items-start z-[100]">
-        <div className="nav-logo relative z-[100]">
-          <AcadFlowLogo className="w-20 lg:w-28 min-[2000px]:w-48 origin-top-left" />
+        <div className="nav-logo relative z-[100] flex items-center gap-2 lg:gap-3 origin-top-left">
+          <AcadFlowLogo className="w-12 lg:w-16 min-[2000px]:w-24" />
+          <div className="flex flex-col -space-y-1 lg:-space-y-2 mt-1">
+            <span className="font-barlow font-bold text-2xl lg:text-3xl min-[2000px]:text-5xl tracking-tight text-base-300">
+              ACAD<span className="text-base-500">FLOW</span>
+            </span>
+            <span className="font-barlow font-medium text-[0.65rem] lg:text-[0.75rem] min-[2000px]:text-base tracking-[0.15em] text-gray-500 uppercase">
+              Submissions made easy
+            </span>
+          </div>
         </div>
 
         {/* Desktop Links */}
         <div className="nav-items hidden lg:flex gap-10 min-[2000px]:gap-24 items-center">
-          {['SHOP', 'WHOLESALE', 'ABOUT', 'CONTACT', 'FAQ', 'CART(0)'].map((text) => (
+          {['SHOP', 'WHOLESALE', 'ABOUT', 'CONTACT', 'FAQ'].map((text) => (
             <a key={text} href="#" className="font-barlow font-semibold text-[2.5rem] min-[2000px]:text-[4.5rem] uppercase no-underline group overflow-hidden flex h-[1.2em] text-base-500">
               <div className="nav-word-wrapper flex">
                 {text.split('').map((char, i) => (
@@ -455,12 +514,49 @@ function App() {
               </div>
             </a>
           ))}
+
+          {/* Theme Toggle Button */}
+          <button 
+            onClick={toggleTheme}
+            className="nav-word-wrapper relative flex items-center justify-center h-[48px] w-[48px] min-[2000px]:h-[72px] min-[2000px]:w-[72px] rounded-full hover:bg-base-200/50 transition-colors text-base-500 cursor-pointer pointer-events-auto"
+            aria-label="Toggle Theme"
+          >
+            <Sun className={`w-7 h-7 min-[2000px]:w-10 min-[2000px]:h-10 transition-transform duration-500 ${isDark ? '-rotate-90 scale-0' : 'rotate-0 scale-100'}`} />
+            <Moon className={`absolute w-7 h-7 min-[2000px]:w-10 min-[2000px]:h-10 transition-transform duration-500 ${isDark ? 'rotate-0 scale-100' : 'rotate-90 scale-0'}`} />
+          </button>
+
+          {/* Main Portal Button */}
+          <a href="#" className="nav-word-wrapper relative overflow-hidden group pointer-events-auto bg-base-500 border-2 border-base-500 text-base-100 rounded-[16px] px-6 h-[48px] min-[2000px]:h-[72px] flex items-center justify-center font-barlow font-bold text-[1.5rem] min-[2000px]:text-[3rem] transition-colors duration-300 hover:bg-transparent">
+            <div className="flex h-[1.2em] overflow-hidden">
+              {"MAIN PORTAL".split('').map((char, i) => (
+                <div
+                  key={i}
+                  className="transition-transform duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-1/2 flex flex-col h-[2.4em]"
+                  style={{ transitionDelay: `${i * 25}ms` }}
+                >
+                  <span className="h-[1.2em] leading-[1.2] flex items-center">{char === ' ' ? '\u00A0' : char}</span>
+                  <span className="h-[1.2em] leading-[1.2] flex items-center text-transparent [-webkit-text-stroke:1px_theme('colors.base.500')]">{char === ' ' ? '\u00A0' : char}</span>
+                </div>
+              ))}
+            </div>
+          </a>
         </div>
 
       </nav>
 
       {/* Floating Buttons */}
       <div className={`floating-nav-buttons fixed z-[1] top-[16px] right-[96px] min-[2000px]:right-[140px] flex items-center gap-2 min-[2000px]:gap-4 invisible opacity-0 pointer-events-none lg:-translate-y-5 ${isMenuOpen ? 'opacity-0 pointer-events-none' : ''}`}>
+        
+        {/* Theme Toggle Button (Floating/Mobile) */}
+        <button 
+          onClick={toggleTheme}
+          className="relative flex items-center justify-center h-[48px] w-[48px] min-[2000px]:h-[72px] min-[2000px]:w-[72px] transition-colors text-base-500 hover:text-base-400 cursor-pointer pointer-events-auto"
+          aria-label="Toggle Theme"
+        >
+          <Sun className={`w-5 h-5 min-[2000px]:w-8 min-[2000px]:h-8 transition-transform duration-500 ${isDark ? '-rotate-90 scale-0' : 'rotate-0 scale-100'}`} />
+          <Moon className={`absolute w-5 h-5 min-[2000px]:w-8 min-[2000px]:h-8 transition-transform duration-500 ${isDark ? 'rotate-0 scale-100' : 'rotate-90 scale-0'}`} />
+        </button>
+
         <a href="#" className="floating-btn get-sauce relative overflow-hidden group pointer-events-auto bg-base-500 border-2 border-base-500 text-base-100 rounded-[16px] px-4 md:px-6 min-[2000px]:px-10 h-[48px] min-[2000px]:h-[72px] flex items-center justify-center font-barlow font-bold text-lg md:text-xl min-[2000px]:text-3xl transition-colors duration-300 hover:bg-transparent hover:text-base-500">
           <span className="relative z-10">GET SAUCE</span>
         </a>
@@ -558,9 +654,18 @@ function App() {
       {/* Hero */}
       <section className="hero relative w-full h-[100svh] bg-base-100 z-0">
         <div className="hero-header absolute top-[25%] md:top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] md:w-[90%] lg:w-[55%] min-[2000px]:w-[50%] text-center">
-          <h1 className="font-barlow font-semibold text-[clamp(2.8rem,10vw,9rem)] md:text-[clamp(3rem,6vw,9rem)] lg:text-[clamp(3.5rem,5.5vw,9rem)] leading-[0.85] uppercase m-0 text-base-500">
-            <span className="text-transparent [-webkit-text-stroke:2px_theme('colors.base.500')]">THE ACADEMIC HUB</span> YOU<br />WILL RELY ON FOR<br />FLAWLESS SUBMISSIONS
-          </h1>
+          <div className="relative inline-block">
+            <h1 className="font-barlow font-semibold text-[clamp(2.8rem,10vw,9rem)] md:text-[clamp(3rem,6vw,9rem)] lg:text-[clamp(3.5rem,5.5vw,9rem)] leading-[0.85] uppercase m-0 text-base-500">
+              <span className="text-transparent [-webkit-text-stroke:2px_theme('colors.base.500')]">THE ACADEMIC HUB</span> YOU<br />WILL RELY ON FOR<br />FLAWLESS SUBMISSIONS
+            </h1>
+
+            {/* Grinning Lottie Sticker */}
+            <div className="absolute -top-10 -right-8 md:-top-16 md:-right-16 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rotate-[15deg] z-20 pointer-events-none drop-shadow-xl">
+              <div className="lottie-sticker w-full h-full">
+                <DotLottieReact src={grinningLottie} loop autoplay />
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="hero-img absolute left-1/2 bottom-[-5%] md:bottom-[-5%] lg:bottom-[-15%] -translate-x-1/2 w-[55%] md:w-[45%] lg:w-[30%] min-[2000px]:w-[25%] min-w-[200px] md:min-w-[250px] aspect-square flex justify-center items-center">
@@ -585,13 +690,6 @@ function App() {
       {/* Spacer to enable scrolling for ScrollTrigger */}
       <div className="h-[30vh] bg-base-100"></div>
 
-      {/* Dark Mode Toggle */}
-      <button
-        onClick={() => setIsDark(!isDark)}
-        className="fixed bottom-20 right-6 z-[100] px-4 py-2 bg-base-500 text-base-100 rounded-full font-instrument shadow-lg border border-base-400 hover:scale-105 transition-transform cursor-pointer"
-      >
-        {isDark ? 'Light Mode' : 'Dark Mode'}
-      </button>
     </div>
   );
 }
