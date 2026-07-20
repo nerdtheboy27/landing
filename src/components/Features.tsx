@@ -108,7 +108,7 @@ export function Features() {
 
       // Handle morphing independently to ensure exact final-stage timing
       const totalCards = cardsRef.current.length;
-      cardsRef.current.forEach((card, i) => {
+      cardsRef.current.forEach((_, i) => {
         if (i === 0) return;
 
         // When Card i finishes placing:
@@ -121,8 +121,11 @@ export function Features() {
         // Only animate the card IMMEDIATELY BEFORE this one (j = i - 1)
         // It morphs directly to its final target opacity during this exact step
         const targetJ = i - 1;
-        const targetOverlay = cardsRef.current[targetJ].querySelector('.header-overlay');
-
+        const targetCard = cardsRef.current[targetJ];
+        if (!targetCard) return;
+        
+        const targetOverlay = targetCard.querySelector('.header-overlay');
+        
         if (targetOverlay) {
           const finalOpacity = (totalCards - 1 - targetJ) * 0.15;
 
