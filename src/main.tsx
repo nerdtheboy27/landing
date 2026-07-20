@@ -4,11 +4,14 @@ import './index.css'
 import 'lenis/dist/lenis.css'
 import App from './App.tsx'
 import SmoothScrolling from './SmoothScrolling.tsx'
+import { PreloaderProvider } from './context/PreloaderContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SmoothScrolling>
-      <App />
+      <PreloaderProvider>
+        <App />
+      </PreloaderProvider>
     </SmoothScrolling>
   </StrictMode>,
 )

@@ -11,6 +11,8 @@ import { Header } from './components/Header';
 import { MobileMenu } from './components/MobileMenu';
 import { Hero } from './components/Hero';
 import { AboutUs } from './components/AboutUs';
+import { Features } from './components/Features';
+import { usePreloader } from './context/PreloaderContext';
 
 gsap.registerPlugin(SplitText, ScrollTrigger);
 
@@ -22,6 +24,7 @@ function App() {
   const [isDark, setIsDark] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuAnimationComplete, setIsMenuAnimationComplete] = useState(false);
+  const { setIsPreloaderComplete } = usePreloader();
   const preloaderFinished = useRef(false);
   const lenis = useLenis();
   const lenisRef = useRef(lenis);
@@ -30,6 +33,7 @@ function App() {
   useEffect(() => {
     if (lenis && !preloaderFinished.current) {
       lenis.scrollTo(0, { immediate: true });
+      lenis.stop(); // Ensure lenis is locked if initialized late
     }
   }, [lenis]);
 
@@ -88,8 +92,11 @@ function App() {
 
   useGSAP(() => {
     window.scrollTo(0, 0);
+    document.body.style.overflow = 'hidden'; // Hard lock native scrolling
+    
     if (lenisRef.current) {
       lenisRef.current.scrollTo(0, { immediate: true });
+      lenisRef.current.stop(); // Hard lock Lenis scrolling
     }
     let mm = gsap.matchMedia(container);
 
@@ -364,6 +371,13 @@ function App() {
       // Finalize preloader sequence
       tl.call(() => {
         preloaderFinished.current = true;
+        setIsPreloaderComplete(true);
+
+        // Unlock scroll instantly when preloader is gone
+        document.body.style.overflow = '';
+        if (lenisRef.current) {
+          lenisRef.current.start();
+        }
 
         // Setup About Us Animation ONLY after Hero is completely done
         gsap.set(".animated-text", { opacity: 1 }); // Reveal the hidden wrapper
@@ -532,6 +546,7 @@ function App() {
       <MobileMenu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} isMenuAnimationComplete={isMenuAnimationComplete} />
       <Hero />
       <AboutUs />
+      <Features />
     </div>
   );
 }
