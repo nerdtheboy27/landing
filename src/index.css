@@ -3,6 +3,21 @@
 @tailwind utilities;
 
 @layer base {
+  @font-face {
+    font-family: 'PestoFresco Regular';
+    src: url('./assets/fonts/fonnts.com-PestoFresco_Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'PestoFresco Thin Rough';
+    src: url('./assets/fonts/fonnts.com-PestoFresco_Thin_Rough.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
   :root {
     --base-100: #eff6ff; /* blue-50 */
     --base-200: #bfdbfe; /* blue-200 */
