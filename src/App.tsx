@@ -75,6 +75,7 @@ function App() {
   }, [isDark]);
 
   const container = useRef<HTMLDivElement>(null);
+  const scrollTextSectionRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     // Make sure SplitText and fonts are ready
@@ -460,6 +461,36 @@ function App() {
     }
   }, { scope: container, dependencies: [isMenuOpen] });
 
+  // Scroll Text Animation
+  useGSAP(() => {
+    document.fonts.ready.then(() => {
+      if (!scrollTextSectionRef.current) return;
+      
+      const textElement = scrollTextSectionRef.current.querySelector('.animated-text');
+      if (!textElement) return;
+
+      const split = new SplitText(textElement, {
+        type: "words",
+        wordsClass: "inline-block will-change-transform"
+      });
+
+      gsap.from(split.words, {
+        scrollTrigger: {
+          trigger: scrollTextSectionRef.current,
+          start: "top 75%",
+          toggleActions: "play none none reverse",
+        },
+        y: () => gsap.utils.random(100, 250),
+        x: () => gsap.utils.random(-40, 40),
+        rotation: () => gsap.utils.random(-60, 60),
+        opacity: 0,
+        stagger: 0.05,
+        ease: "back.out(1.5)",
+        duration: 0.5
+      });
+    });
+  }, { scope: container });
+
   return (
     <div ref={container} className="relative w-full min-h-screen overflow-x-hidden bg-base-100 text-base-500">
       {/* Preloader */}
@@ -499,7 +530,7 @@ function App() {
         {/* Desktop Links */}
         <div className="nav-items hidden lg:flex gap-10 min-[2000px]:gap-24 items-center">
           {['SHOP', 'WHOLESALE', 'ABOUT', 'CONTACT', 'FAQ'].map((text) => (
-            <a key={text} href="#" className="font-barlow font-semibold text-[2.5rem] min-[2000px]:text-[4.5rem] uppercase no-underline group overflow-hidden flex h-[1.2em] text-base-500">
+            <a key={text} href="#" onClick={(e) => e.preventDefault()} className="font-barlow font-semibold text-[2.5rem] min-[2000px]:text-[4.5rem] uppercase no-underline group overflow-hidden flex h-[1.2em] text-base-500 active:scale-[0.97] transition-transform duration-150 ease-out">
               <div className="nav-word-wrapper flex">
                 {text.split('').map((char, i) => (
                   <div
@@ -518,7 +549,7 @@ function App() {
           {/* Theme Toggle Button */}
           <button 
             onClick={toggleTheme}
-            className="nav-word-wrapper relative flex items-center justify-center h-[48px] w-[48px] min-[2000px]:h-[72px] min-[2000px]:w-[72px] rounded-full hover:bg-base-200/50 transition-colors text-base-500 cursor-pointer pointer-events-auto"
+            className="nav-word-wrapper relative flex items-center justify-center h-[48px] w-[48px] min-[2000px]:h-[72px] min-[2000px]:w-[72px] rounded-full hover:bg-base-200/50 transition-all duration-150 ease-out active:scale-[0.90] text-base-500 cursor-pointer pointer-events-auto"
             aria-label="Toggle Theme"
           >
             <Sun className={`w-7 h-7 min-[2000px]:w-10 min-[2000px]:h-10 transition-transform duration-500 ${isDark ? '-rotate-90 scale-0' : 'rotate-0 scale-100'}`} />
@@ -526,7 +557,7 @@ function App() {
           </button>
 
           {/* Main Portal Button */}
-          <a href="#" className="nav-word-wrapper relative overflow-hidden group pointer-events-auto bg-base-500 border-2 border-base-500 text-base-100 rounded-[16px] px-6 h-[48px] min-[2000px]:h-[72px] flex items-center justify-center font-barlow font-bold text-[1.5rem] min-[2000px]:text-[3rem] transition-colors duration-300 hover:bg-transparent">
+          <a href="#" onClick={(e) => e.preventDefault()} className="nav-word-wrapper relative overflow-hidden group pointer-events-auto bg-base-500 border-2 border-base-500 text-base-100 rounded-[16px] px-6 h-[48px] min-[2000px]:h-[72px] flex items-center justify-center font-barlow font-bold text-[1.5rem] min-[2000px]:text-[3rem] transition-all duration-300 ease-out hover:bg-transparent active:scale-[0.97] active:duration-150">
             <div className="flex h-[1.2em] overflow-hidden">
               {"MAIN PORTAL".split('').map((char, i) => (
                 <div
@@ -550,14 +581,14 @@ function App() {
         {/* Theme Toggle Button (Floating/Mobile) */}
         <button 
           onClick={toggleTheme}
-          className="relative flex items-center justify-center h-[48px] w-[48px] min-[2000px]:h-[72px] min-[2000px]:w-[72px] transition-colors text-base-500 hover:text-base-400 cursor-pointer pointer-events-auto"
+          className="relative flex items-center justify-center h-[48px] w-[48px] min-[2000px]:h-[72px] min-[2000px]:w-[72px] transition-all duration-150 ease-out text-base-500 hover:text-base-400 active:scale-[0.90] cursor-pointer pointer-events-auto"
           aria-label="Toggle Theme"
         >
           <Sun className={`w-5 h-5 min-[2000px]:w-8 min-[2000px]:h-8 transition-transform duration-500 ${isDark ? '-rotate-90 scale-0' : 'rotate-0 scale-100'}`} />
           <Moon className={`absolute w-5 h-5 min-[2000px]:w-8 min-[2000px]:h-8 transition-transform duration-500 ${isDark ? 'rotate-0 scale-100' : 'rotate-90 scale-0'}`} />
         </button>
 
-        <a href="#" className="floating-btn get-sauce relative overflow-hidden group pointer-events-auto bg-base-500 border-2 border-base-500 text-base-100 rounded-[16px] px-4 md:px-6 min-[2000px]:px-10 h-[48px] min-[2000px]:h-[72px] flex items-center justify-center font-barlow font-bold text-lg md:text-xl min-[2000px]:text-3xl transition-colors duration-300 hover:bg-transparent hover:text-base-500">
+        <a href="#" onClick={(e) => e.preventDefault()} className="floating-btn get-sauce relative overflow-hidden group pointer-events-auto bg-base-500 border-2 border-base-500 text-base-100 rounded-[16px] px-4 md:px-6 min-[2000px]:px-10 h-[48px] min-[2000px]:h-[72px] flex items-center justify-center font-barlow font-bold text-lg md:text-xl min-[2000px]:text-3xl transition-all duration-300 ease-out hover:bg-transparent hover:text-base-500 active:scale-[0.95] active:duration-150">
           <span className="relative z-10">GET SAUCE</span>
         </a>
       </div>
@@ -603,6 +634,7 @@ function App() {
               <a
                 key={text}
                 href="#"
+                onClick={(e) => e.preventDefault()}
                 className="mobile-menu-link opacity-0 border-b border-dashed border-base-400 block group relative"
               >
                 {/* Dummy Hover Image (fixed, z-0) */}
@@ -631,7 +663,7 @@ function App() {
             ))}
           </div>
           <div className="flex gap-4 mt-8">
-            <a href="#" className="mobile-social opacity-0 flex-1 py-4 px-6 md:py-6 md:px-8 border-2 border-base-100 rounded-xl flex items-center justify-between font-barlow font-bold text-xl md:text-3xl text-base-100 hover:text-base-500 hover:-translate-y-1 active:scale-[0.97] active:translate-y-0 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] relative overflow-hidden group">
+            <a href="#" onClick={(e) => e.preventDefault()} className="mobile-social opacity-0 flex-1 py-4 px-6 md:py-6 md:px-8 border-2 border-base-100 rounded-xl flex items-center justify-between font-barlow font-bold text-xl md:text-3xl text-base-100 hover:text-base-500 hover:-translate-y-1 active:scale-[0.97] active:translate-y-0 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] relative overflow-hidden group">
               <div className="absolute inset-0 bg-base-100 translate-y-full transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 z-0"></div>
               <span className="relative z-10">INSTAGRAM</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 md:w-8 md:h-8 relative z-10 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:rotate-6">
@@ -640,7 +672,7 @@ function App() {
                 <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
               </svg>
             </a>
-            <a href="#" className="mobile-social opacity-0 flex-1 py-4 px-6 md:py-6 md:px-8 border-2 border-base-100 rounded-xl flex items-center justify-between font-barlow font-bold text-xl md:text-3xl text-base-100 hover:text-base-500 hover:-translate-y-1 active:scale-[0.97] active:translate-y-0 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] relative overflow-hidden group">
+            <a href="#" onClick={(e) => e.preventDefault()} className="mobile-social opacity-0 flex-1 py-4 px-6 md:py-6 md:px-8 border-2 border-base-100 rounded-xl flex items-center justify-between font-barlow font-bold text-xl md:text-3xl text-base-100 hover:text-base-500 hover:-translate-y-1 active:scale-[0.97] active:translate-y-0 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] relative overflow-hidden group">
               <div className="absolute inset-0 bg-base-100 translate-y-full transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 z-0"></div>
               <span className="relative z-10">FACEBOOK</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 md:w-8 md:h-8 relative z-10 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:rotate-6">
@@ -687,8 +719,14 @@ function App() {
         </div>
       </section>
 
-      {/* Spacer to enable scrolling for ScrollTrigger */}
-      <div className="h-[30vh] bg-base-100"></div>
+      {/* Scroll Text Section */}
+      <section ref={scrollTextSectionRef} className="scroll-text-section relative w-full min-h-screen bg-base-100 text-base-500 flex items-center justify-center pt-[20vh] pb-32 px-6 md:px-12 lg:px-24 overflow-hidden z-10">
+        <div className="max-w-[1400px] mx-auto text-center">
+          <p className="animated-text font-barlow font-semibold text-[clamp(2rem,6vw,6.5rem)] leading-[1.1] m-0 tracking-tight">
+            Our BBQ sauces use real, natural stuff like it's the 1800s. <span className="text-red-500 inline-block drop-shadow-lg scale-125 mx-2">💥</span> Slap it on anything you grill and act surprised when people think you can <span className="inline-block drop-shadow-lg scale-125 mx-2">👨‍🍳</span> cook.
+          </p>
+        </div>
+      </section>
 
     </div>
   );
