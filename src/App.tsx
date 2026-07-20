@@ -373,7 +373,7 @@ function App() {
           y: () => gsap.utils.random(100, 250),
           x: () => gsap.utils.random(-40, 40),
           rotation: () => gsap.utils.random(-60, 60),
-          opacity: 0,
+          scale: 0,
         }, {
           scrollTrigger: {
             trigger: ".scroll-text-section",
@@ -383,8 +383,24 @@ function App() {
           y: 0,
           x: 0,
           rotation: 0,
+          scale: 1,
+          stagger: 0.06,
+          ease: "back.out(1.5)",
+          duration: 0.5
+        });
+
+        // Separate tween just for opacity so it fades smoothly (power2.out) 
+        // instead of snapping instantly with the back.out ease
+        gsap.fromTo(aboutSplit.words, {
+          opacity: 0,
+        }, {
+          scrollTrigger: {
+            trigger: ".scroll-text-section",
+            start: "top 75%",
+            toggleActions: "play none none reverse",
+          },
           opacity: 1,
-          stagger: 0.04,
+          stagger: 0.06,
           ease: "power2.out",
           duration: 0.5
         });

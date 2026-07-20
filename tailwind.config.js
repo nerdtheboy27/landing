@@ -18,7 +18,7 @@ export default {
       },
       fontFamily: {
         barlow: ['PestoFresco Regular', 'sans-serif'],
-        instrument: ['"Instrument Sans"', 'sans-serif'],
+        instrument: ['"Inter Tight"', 'sans-serif'],
       },
     },
   },
