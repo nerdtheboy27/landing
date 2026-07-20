@@ -7,11 +7,9 @@ interface MobileMenuProps {
 export function MobileMenu({ isMenuOpen, setIsMenuOpen, isMenuAnimationComplete }: MobileMenuProps) {
   return (
     <div
-      className={`mobile-menu mobile-hamburger fixed z-[1] overflow-hidden transition-colors duration-700 border-2 will-change-transform invisible opacity-0 pointer-events-none ${isMenuOpen ? 'bg-base-500 border-base-500 cursor-default !visible !opacity-100 !pointer-events-auto !translate-y-0' : 'bg-base-100 border-base-500 cursor-pointer group'}`}
+      className={`mobile-menu mobile-hamburger fixed z-[1] overflow-hidden transition-colors duration-700 border-2 will-change-transform invisible opacity-0 pointer-events-none w-[64px] sm:w-[72px] h-[36px] sm:h-[40px] md:h-[48px] rounded-[12px] md:rounded-[16px] ${isMenuOpen ? 'bg-base-500 border-base-500 cursor-default !visible !opacity-100 !pointer-events-auto !translate-y-0' : 'bg-base-100 border-base-500 cursor-pointer group'}`}
       style={{
         top: '16px', right: '16px',
-        width: '72px', height: '48px',
-        borderRadius: '16px',
       }}
       onClick={() => !isMenuOpen && setIsMenuOpen(true)}
     >

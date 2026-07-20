@@ -8,14 +8,14 @@ export function Hero() {
   return (
     <>
       <section className="hero relative w-full h-[100svh] bg-base-100 z-10">
-        <div className="hero-header absolute top-[25%] md:top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] md:w-[90%] lg:w-[55%] min-[2000px]:w-[50%] text-center">
+        <div className="hero-header absolute top-[25%] md:top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-4 md:px-8 lg:px-12 text-center flex flex-col items-center">
           <div className="relative inline-block">
-            <h1 className="font-barlow font-normal text-[clamp(2.8rem,10vw,9rem)] md:text-[clamp(3rem,6vw,9rem)] lg:text-[clamp(3.5rem,5.5vw,9rem)] leading-[0.85] uppercase m-0 text-base-500">
+            <h1 className="font-barlow font-normal text-[clamp(2.5rem,9vw,9rem)] md:text-[clamp(3rem,6vw,9rem)] lg:text-[clamp(3.5rem,5.5vw,9rem)] leading-[0.85] uppercase m-0 text-base-500">
               <span className="text-transparent [-webkit-text-stroke:2px_theme('colors.base.500')]">THE ACADEMIC HUB</span> YOU<br />WILL RELY ON FOR<br />FLAWLESS SUBMISSIONS
             </h1>
 
             {/* Grinning Lottie Sticker */}
-            <div className="absolute -top-10 -right-8 md:-top-16 md:-right-16 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rotate-[15deg] z-20 pointer-events-none drop-shadow-xl">
+            <div className="absolute -top-10 -right-4 md:-top-16 md:-right-16 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rotate-[15deg] z-20 pointer-events-none drop-shadow-xl">
               <div className="lottie-sticker w-full h-full">
                 <DotLottieReact src={grinningLottie} loop autoplay />
               </div>

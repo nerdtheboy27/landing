@@ -161,7 +161,7 @@ function App() {
       const tl = gsap.timeline({ delay: 0.5 });
 
       tl.to(".preloader-revealer", {
-        clipPath: "circle(100% at 50% 50%)",
+        scale: 1,
         duration: 1,
         stagger: 0.25,
         ease: "power2.inOut",
@@ -510,11 +510,12 @@ function App() {
       gsap.to(".mobile-menu", {
         top: 16,
         right: 16,
-        width: 72,
-        height: 48,
-        borderRadius: 16,
+        width: window.innerWidth < 640 ? 64 : 72,
+        height: window.innerWidth < 640 ? 36 : window.innerWidth < 768 ? 40 : 48,
+        borderRadius: window.innerWidth < 640 ? 12 : 16,
         duration: 0.4,
-        ease: "power3.inOut"
+        ease: "power3.inOut",
+        clearProps: "width,height,borderRadius"
       });
       // Snappy exit for links and socials
       gsap.to(".mobile-menu-link", { opacity: 0, y: 15, duration: 0.2, ease: "power2.in" });
